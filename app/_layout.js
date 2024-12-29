@@ -18,7 +18,7 @@ const MainLayout = () => {
       router.replace('main');
     } else if (isAuthenticated === false) {
       // Redirect the user to the login page
-      router.replace('login');
+      router.replace('signup');
     }
   }, [isAuthenticated]);
 

@@ -1,13 +1,20 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, Button, Image, TouchableOpacity } from 'react-native';
+import React, { useState, useRef } from 'react';
+import { View, Text, TextInput, Button, Image, TouchableOpacity, Pressable} from 'react-native';
 import { useAuth } from '../context/authContext';
+import { Link, useRouter } from 'expo-router';
+import AntDesign from '@expo/vector-icons/AntDesign';
+import FontAwesome from '@expo/vector-icons/FontAwesome';
 
 export default function Login() {
+  const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const { login } = useAuth();
 
-  const handleLogin = () => {
+  const emailRef = useRef("");
+  const passwordRef = useRef("");
+
+  const handleLogin = async() => {
     login(email, password);
   };
 
@@ -25,17 +32,17 @@ export default function Login() {
       {/* Input Fields */}
       <TextInput
         className="w-full max-w-md border border-gray-400 rounded-lg p-4 mb-4 text-base bg-gray-200 text-gray-700"
-        placeholder="ID Number"
+        placeholder="Email Address"
         placeholderTextColor="#A0A0A0"
         value={email}
-        onChangeText={setEmail}
+        onChangeText={value => emailRef.current = value}
       />
       <TextInput
         className="w-full max-w-md border border-gray-400 rounded-lg p-4 mb-4 text-base bg-gray-200 text-gray-700"
         placeholder="Password"
         placeholderTextColor="#A0A0A0"
         value={password}
-        onChangeText={setPassword}
+        onChangeText={value => passwordRef.current = value}
         secureTextEntry
       />
 
@@ -56,16 +63,21 @@ export default function Login() {
 
       {/* Social Buttons */}
       <TouchableOpacity className="w-full max-w-md flex-row bg-gray-700 rounded-lg p-4 items-center justify-center mb-2">
-        <Text className="text-white font-bold">Google</Text>
+        <AntDesign name="google" size={24} color="white" />
+        <Text className="text-white font-bold ml-2">Google</Text>
       </TouchableOpacity>
-      <TouchableOpacity className="w-full max-w-md flex-row bg-gray-700 rounded-lg p-4 items-center justify-center">
-        <Text className="text-white font-bold">Facebook</Text>
+      <TouchableOpacity className="w-full max-w-md flex-row bg-gray-700 rounded-lg p-4 items-center justify-center mb-2">
+      <FontAwesome name="facebook" size={24} color="white" />
+        <Text className="text-white font-bold ml-2">Facebook</Text>
       </TouchableOpacity>
 
       {/* Create Account */}
-      <TouchableOpacity>
-        <Text className="text-gray-300 mt-4">Create Account</Text>
-      </TouchableOpacity>
+      <View className="flex-row items-center justify-center">
+        <Text className="text-gray-300 mt-4">Don't have an account?</Text>
+          <Pressable onPress={() => router.replace('signup')}>
+          <Text className="text-indigo-500 mt-4"> Sign Up</Text>
+          </Pressable>
+      </View>
     </View>
   );
 }
