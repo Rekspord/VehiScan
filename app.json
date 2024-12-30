@@ -13,13 +13,23 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
+    "updates": {
+      "fallbackToCacheTimeout": 0
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": true
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#ffffff",
+        "package": "com.yourcompany.vehiscan",
+        "permissions": [
+          "CAMERA"
+        ]
       }
     },
     "web": {
@@ -29,14 +39,14 @@
     },
     "plugins": [
       "expo-router",
-      [ "expo-camera",
-      {
-        "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera",
-        "microphonePermission": "Allow $(PRODUCT_NAME) to access your microphone",
-        "recordAudioAndroid": true
-      }
-    ]
-     
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera",
+          "microphonePermission": "Allow $(PRODUCT_NAME) to access your microphone",
+          "recordAudioAndroid": true
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true
