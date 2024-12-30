@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { View, Text, TextInput, Button, Image, TouchableOpacity, Pressable} from 'react-native';
+import { View, Text, TextInput, Button, Image, TouchableOpacity, Pressable, Alert} from 'react-native';
 import { useAuth } from '../context/authContext';
 import { Link, useRouter } from 'expo-router';
 import AntDesign from '@expo/vector-icons/AntDesign';
@@ -14,8 +14,22 @@ export default function Login() {
   const emailRef = useRef("");
   const passwordRef = useRef("");
 
-  const handleLogin = async() => {
-    login(email, password);
+  const handleLogin = async () => {
+    if (!email || !password) {
+      Alert.alert("Login", "Please fill in all fields");
+      return;
+    }
+    // setLoading(true);
+    const response = await login(email, password);
+    // setLoading(false);
+    console.log('got result: ', response);
+    // login process
+    if (!response.success) {
+      Alert.alert("Log In", response.msg);
+    } else {
+      // Navigate to the main page or handle successful login
+      router.push('/main');
+    }
   };
 
   return (
@@ -29,20 +43,20 @@ export default function Login() {
         <Text className="text-4xl font-bold text-white">VehiScan</Text>
       </View>
 
-      {/* Input Fields */}
+            {/* Input Fields */}
       <TextInput
         className="w-full max-w-md border border-gray-400 rounded-lg p-4 mb-4 text-base bg-gray-200 text-gray-700"
         placeholder="Email Address"
         placeholderTextColor="#A0A0A0"
         value={email}
-        onChangeText={value => emailRef.current = value}
+        onChangeText={setEmail}
       />
       <TextInput
         className="w-full max-w-md border border-gray-400 rounded-lg p-4 mb-4 text-base bg-gray-200 text-gray-700"
         placeholder="Password"
         placeholderTextColor="#A0A0A0"
         value={password}
-        onChangeText={value => passwordRef.current = value}
+        onChangeText={setPassword}
         secureTextEntry
       />
 

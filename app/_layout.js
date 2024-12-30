@@ -11,14 +11,14 @@ const MainLayout = () => {
 
   useEffect(() => {
     // Check if the user is authenticated
-    if (typeof isAuthenticated === 'undefined') return;
+    if (typeof isAuthenticated == 'undefined') return;
     const inApp = segments[0] === '(app)';
     if (isAuthenticated && !inApp) {
       // Redirect the user to the app
       router.replace('main');
-    } else if (isAuthenticated === false) {
+    } else if (isAuthenticated == false) {
       // Redirect the user to the login page
-      router.replace('signup');
+      router.replace('login');
     }
   }, [isAuthenticated]);
 

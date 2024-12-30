@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, Image, TouchableOpacity, Pressable} from 'react-native';
+import { View, Text, TextInput, Button, Image, TouchableOpacity, Pressable, Alert} from 'react-native';
 import { useAuth } from '../context/authContext';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
@@ -24,7 +24,7 @@ export default function Signup() {
 
   const handleSignup = async () => {
     if (!password|| !email || !firstName || !lastName) {
-      alert('Signup!! Please fill in all fields');
+      Alert.alert('Sign Up', 'Please fill in all fields');
       return;
     }
     try {

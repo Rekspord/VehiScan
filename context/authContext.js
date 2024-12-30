@@ -24,17 +24,21 @@ export const AuthContextProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
-      // Implement login logic here
+      const response = await signInWithEmailAndPassword(auth, email, password);
+      return {success: true};
     } catch (error) {
-      console.error(error);
+      let msg = error.message;
+      if (msg.includes('auth/invalid-email')) msg = 'Please enter a valid email address.';
+      if (msg.includes('auth/invalid-credentials')) msg = 'Please enter a valid email address.';
+      return {success: false, msg: error.message};
     }
   };
 
-  const logout = () => {
+  const logout = async () => {
     try {
-      // Implement logout logic here
+      await signOut(auth);
     } catch (error) {
-      console.error(error);
+      console.error('Error signing out:', error);
     }
   };
 
@@ -55,7 +59,8 @@ export const AuthContextProvider = ({ children }) => {
     } catch (error) {
         let msg = error.message;
         if (msg.includes('auth/invalid-email')) msg = 'Please enter a valid email address.';
-        return {success: false, msg: e.message};
+        if (msg.includes('auth/email-already-in-use')) msg = 'Email already in use.';
+        return {success: false, msg: error.message};
     }
   };
 
