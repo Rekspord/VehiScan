@@ -7,19 +7,40 @@ import { Link, useRouter } from 'expo-router';
 
 export default function Signup() {
   const router = useRouter();
+  const {register} = useAuth();
+  const [loading, setLoading] = useState(false);
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [username, setUsername] = useState('');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
-  const { register } = useAuth();
 
-  const Signup = () => {
-    const [password, setPassword] = useState('');
-  }
-  const handleSignup = () => {
-    register(email, password, username);
+  //const Signup = () => {
+    //const [password, setPassword] = useState('');
+  //}
+  //const handleSignup = () => {
+    //register(email, password, username);
+  //};
+
+  const handleSignup = async () => {
+    if (!password|| !email || !firstName || !lastName) {
+      alert('Signup!! Please fill in all fields');
+      return;
+    }
+    try {
+      let response = await register(password, email, firstName, lastName);
+      console.log('got result: ', response);
+
+      if (response.success) {
+        alert('Sign Up', response.msg);
+      } else {
+        alert('Error', response.msg);
+      }
+    } catch (error) {
+      console.error('Error registering:', error);
+    }
   };
+
 
   return (
   <View className="flex-1 justify-center items-center bg-gray-800 px-4">
@@ -51,11 +72,10 @@ export default function Signup() {
       </View>
       <TextInput
         className="w-full max-w-md border border-gray-400 rounded-lg p-4 mb-4 text-base bg-gray-200 text-gray-700"
-        placeholder="Username"
+        placeholder="Email"
         placeholderTextColor="#A0A0A0"
-        value={username}
-        onChangeText={setUsername}
-        secureTextEntry
+        value={email}
+        onChangeText={setEmail}
       />
       <TextInput
         className="w-full max-w-md border border-gray-400 rounded-lg p-4 mb-4 text-base bg-gray-200 text-gray-700"
