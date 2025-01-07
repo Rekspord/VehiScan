@@ -8,12 +8,10 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { handleBarCodeScanned } from "./qrCodeUtils";
 import { CameraView, useCameraPermissions } from 'expo-camera';
 
-
 const Main = () => {
   const [hasPermission, setHasPermission] = useState(null);
   const [scanned, setScanned] = useState(false);
   const [barcode, setBarcode] = useState('');
-
 
   useEffect(() => {
     (async () => {
@@ -29,6 +27,17 @@ const Main = () => {
     } else {
       Alert.alert(`Bar code with type ${type} and data ${data} has been scanned!`);
     }
+  };
+
+  const handleQRCodeScanned = ({ type, data }) => {
+    setScanned(true);
+    Alert.alert("QR Code Scanned", `Type: ${type}\nData: ${data}`);
+  };
+
+  const processAnyQRCode = (type, data) => {
+    setScanned(true);
+    Alert.alert("QR Code Processed", `Type: ${type}\nData: ${data}`);
+    // Add additional logic here to handle any kind of QR code as needed
   };
 
   const handleLogout = async () => {
@@ -57,57 +66,56 @@ const Main = () => {
     }
   };
 
-  
-    const handleScan = (scanData) => {
-      if (!scanningInfinitely) {
-        setScanned(true);
-      }
-  
-      const cameraViewSize = {
-        width: Dimensions.get("screen").width,
-        height: Dimensions.get("screen").height,
-      };
-  
-      if (
-        handleBarCodeScanned(
-          scanData.type,
-          scanData.data,
-          scanData.cornerPoints,
-          cameraViewSize,
-          minSize,
-          maxSize,
-          toleranceFactor
-        )
-      ) {
-        if (onScanSuccess) {
-          onScanSuccess(scanData);
-        }
-      } else {
-        if (onScanFail) {
-          onScanFail(scanData);
-        }
-      }
-    }; 
+  const handleScan = (scanData) => {
+    if (!scanningInfinitely) {
+      setScanned(true);
+    }
 
-    const handleBarcode = async (barcode) => {
-      if (!scanned) {
-        setScanned(true); // limits scan
-        setBarcode(barcode); // stores barcode
-        checkBarcodeStatus(barcode).then((status) => {
-          if (status === 0) {
-            console.log("Barcode found");
-            setModalVisible(true);
-            setModalType("found"); // Set the modal type to "found"
-          } else if (status === 1) {
-            console.log("Barcode not found");
-            setModalVisible(true);
-            setModalType("notFound"); // Set the modal type to "notFound"
-          } else {
-            console.log("Error checking barcode.");
-          }
-        });
-      }
+    const cameraViewSize = {
+      width: Dimensions.get("screen").width,
+      height: Dimensions.get("screen").height,
     };
+
+    if (
+      handleBarCodeScanned(
+        scanData.type,
+        scanData.data,
+        scanData.cornerPoints,
+        cameraViewSize,
+        minSize,
+        maxSize,
+        toleranceFactor
+      )
+    ) {
+      if (onScanSuccess) {
+        onScanSuccess(scanData);
+      }
+    } else {
+      if (onScanFail) {
+        onScanFail(scanData);
+      }
+    }
+  };
+
+  const handleBarcode = async (barcode) => {
+    if (!scanned) {
+      setScanned(true); // limits scan
+      setBarcode(barcode); // stores barcode
+      checkBarcodeStatus(barcode).then((status) => {
+        if (status === 0) {
+          console.log("Barcode found");
+          setModalVisible(true);
+          setModalType("found"); // Set the modal type to "found"
+        } else if (status === 1) {
+          console.log("Barcode not found");
+          setModalVisible(true);
+          setModalType("notFound"); // Set the modal type to "notFound"
+        } else {
+          console.log("Error checking barcode.");
+        }
+      });
+    }
+  };
 
   return (
       <View className="flex-1 bg-gray-600 justify-between">
@@ -122,7 +130,6 @@ const Main = () => {
           </TouchableOpacity>
         </View>
 
-
         <View className="flex-1 justify-center items-center">
           <View className="bg-darkgray w-80 h-80 rounded-lg flex items-center justify-center">
             {/* QR Code Scanner */}
@@ -131,10 +138,10 @@ const Main = () => {
               className="w-full h-full"
               facing="back"
               onBarcodeScanned={(barcode) => {
-                scanned ? undefined : handleBarcode(barcode.data);
+                scanned ? undefined : processAnyQRCode(barcode.type, barcode.data);
               }}
             />
-            
+
             {scanned && (
               <TouchableOpacity onPress={() => setScanned(false)} className="mt-5">
                 <Text className="text-blue-500">Tap to Scan Again</Text>
