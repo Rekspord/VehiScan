@@ -7,11 +7,13 @@ import Entypo from '@expo/vector-icons/Entypo';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { handleBarCodeScanned } from "./qrCodeUtils";
 import { CameraView, useCameraPermissions } from 'expo-camera';
+import { Link, useRouter } from 'expo-router';
 
 const Main = () => {
   const [hasPermission, setHasPermission] = useState(null);
   const [scanned, setScanned] = useState(false);
   const [barcode, setBarcode] = useState('');
+  const router = useRouter();
 
   useEffect(() => {
     (async () => {
@@ -117,25 +119,28 @@ const Main = () => {
     }
   };
 
+  const handleProfile = () => {
+    router.push('profile');
+  };
+
   return (
       <View className="flex-1 bg-gray-600 justify-between">
         <View className="flex-row justify-between items-center p-4">
-          <TouchableOpacity>
+          <TouchableOpacity onPress={handleProfile}>
             <Ionicons name="person" size={30} color="black" />
           </TouchableOpacity>
-          <TouchableOpacity>
+          <Link href="menu">
             <View className="bg-gray-600 w-10 h-10 rounded-full flex items-center justify-center">
               <Entypo name="menu" size={40} color="black" />
             </View>
-          </TouchableOpacity>
+          </Link>
         </View>
 
         <View className="flex-1 justify-center items-center">
           <View className="bg-darkgray w-80 h-80 rounded-lg flex items-center justify-center">
             {/* QR Code Scanner */}
             <CameraView
-              style={{ width: 400, height: 600 }}
-              className="w-full h-full"
+              style={{ width: 400, height: 500 }}
               facing="back"
               onBarcodeScanned={(barcode) => {
                 scanned ? undefined : processAnyQRCode(barcode.type, barcode.data);
@@ -143,8 +148,8 @@ const Main = () => {
             />
 
             {scanned && (
-              <TouchableOpacity onPress={() => setScanned(false)} className="mt-5">
-                <Text className="text-blue-500">Tap to Scan Again</Text>
+              <TouchableOpacity onPress={() => setScanned(false)} className="mt-5 p-2 bg-white rounded">
+                <Text className="text-black">SCAN AGAIN</Text>
               </TouchableOpacity>
             )}
           </View>
