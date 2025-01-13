@@ -26,6 +26,7 @@ const History = () => {
       });
       console.log(vehicles);
       setVehicles(vehicles); 
+      setLoading(false);
     });
 
     return () => unsubscribe();
@@ -42,11 +43,16 @@ const History = () => {
       }}
       className="bg-gray-800 p-4 rounded mb-2 w-full flex-1 justify-center items-center"
     >
-      <Text className="text-lg text-white text-center">{item.data}</Text>
+      <Text className="text-lg text-white text-center">{item.licensePlate} - {item.model}</Text>
       {item.id === expandedVehicle && (
-        <Text className="text-sm text-gray-500 text-center">
-          Expanded information about {item.data}
-        </Text>
+        <View className="bg-gray-800 p-4 rounded mb-2 w-full flex-1 justify-center items-center">
+          <View className="flex-1 justify-center items-center">
+            <Text className="text-white">Vehicle ID: {item.id}</Text>
+            <Text className="text-white">License Plate: {item.licensePlate}</Text>
+            <Text className="text-white">Model: {item.model}</Text>
+            <Text className="text-white">Year: {item.year}</Text>
+          </View>
+        </View>
       )}
     </TouchableOpacity>
   );
@@ -72,14 +78,7 @@ const History = () => {
       <Text className="text-2xl text-white text-center font-bold">HISTORY</Text>
       <FlatList
         data={vehicles} 
-        renderItem={({ item }) => (
-          <View style={{ height: 50, flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-            <Text>Vehicle ID: {item.id}</Text>
-            <Text>License Plate: {item.licensePlate}</Text>
-            <Text>Model: {item.model}</Text>
-            <Text>Year: {item.year}</Text>
-          </View>
-        )}
+        renderItem={renderVehicle}
         keyExtractor={item => item.id}
         className="mt-4 w-full"
       />

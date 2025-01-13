@@ -1,9 +1,37 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Alert } from 'react-native';
-import { vehiclesCollection } from '../../firebaseConfig'; // Adjust the import path as needed
+import React, { useState, useEffect } from 'react';
+import { View, Text, TextInput, TouchableOpacity, Alert, Modal } from 'react-native';
+import { vehiclesCollection, db, app } from '../../firebaseConfig';
+import { collection, onSnapshot } from 'firebase/firestore';
 import { addDoc } from 'firebase/firestore';
+import QRCode from 'react-native-qrcode-svg';
+import * as FileSystem from 'expo-file-system';
 
 const AddVehicle = () => {
+  const [loading, setLoading] = useState(true);
+  const [vehicles, setVehicles] = useState([]); // Initial empty array of users
+
+  const [modalVisible, setModalVisible] = useState(false);
+  const [qrCodeValue, setQrCodeValue] = useState(null);
+
+  const firebase = app;
+  const firestore = db;
+
+  useEffect(() => {
+    const vehiclesCollectionRef = collection(firestore, 'vehicles');
+
+    const unsubscribe = onSnapshot(vehiclesCollectionRef, (querySnapshot) => {
+      const vehicles = [];
+      querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        vehicles.push({ id: doc.id, licensePlate: data.licensePlate, model: data.model, year: data.year });
+      });
+      console.log(vehicles);
+      setVehicles(vehicles);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
   const [vehicleInfo, setVehicleInfo] = useState({
     model: '',
     year: '',
@@ -15,19 +43,31 @@ const AddVehicle = () => {
   };
 
   const handleSubmit = async () => {
+    if (vehicleInfo.model === '' || vehicleInfo.year === '' || vehicleInfo.licensePlate === '') {
+      Alert.alert('Error', 'Please fill in all fields');
+      return;
+    }
+
     try {
-      await addDoc(vehiclesCollection, vehicleInfo);
-      Alert.alert('Vehicle Added', 'Your vehicle information has been submitted.');
+      const docRef = await addDoc(vehiclesCollection, vehicleInfo);
+      const docId = docRef.id;
+      setQrCodeValue(`https://vehiscan2.firebaseapp.com/${docId}`);
+      setModalVisible(true);
     } catch (error) {
       Alert.alert('Error', 'There was an error submitting your vehicle information.');
       console.error('Error adding vehicle: ', error);
     }
   };
 
+  const handleDownloadQrCode = () => {
+    // Implement QR code download logic here
+    console.log('QR code downloaded!');
+  };
+
   return (
     <View className="flex-1 justify-center items-center bg-gray-600 p-4">
       <Text className="text-2xl font-bold mb-8">Add Vehicle</Text>
-      
+
       {/* Input Fields */}
       <View className="flex-row w-full max-w-md mb-4">
         <TextInput
@@ -60,6 +100,26 @@ const AddVehicle = () => {
       >
         <Text className="text-center text-white font-bold">Submit</Text>
       </TouchableOpacity>
+
+      {/* Modal */}
+      <Modal visible={modalVisible} transparent={true}>
+        <View className="flex-1 justify-center items-center bg-gray-600 p-4">
+          <Text className="text-2xl font-bold mb-8">Generated QR Code</Text>
+          <QRCode value={qrCodeValue} size={200} color="#000" backgroundColor="#fff" />
+          <TouchableOpacity
+            className="w-full max-w-md bg-gray-700 rounded-lg p-4 mb-4"
+            onPress={handleDownloadQrCode}
+          >
+            <Text className="text-center text-white font-bold">Download QR Code</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            className="w-full max-w-md bg-gray-700 rounded-lg p-4 mb-4"
+            onPress={() => setModalVisible(false)}
+          >
+            <Text className="text-center text-white font-bold">Back</Text>
+          </TouchableOpacity>
+        </View>
+      </Modal>
     </View>
   );
 };
