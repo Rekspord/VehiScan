@@ -22,7 +22,23 @@ const History = () => {
       const vehicles = [];
       querySnapshot.forEach((doc) => {
         const data = doc.data();
-        vehicles.push({id: doc.id, licensePlate: data.licensePlate, model: data.model, year: data.year});
+        vehicles.push({
+          id: doc.id, 
+          licensePlate: data.licensePlate, 
+          make: data.make, 
+          yearModel: data.yearModel,  
+          bodyType: data.bodyType,
+          chassisNumber: data.chassisNumber,
+          engineNumber: data.engineNumber,
+          color: data.color,
+          fuel: data.fuel,
+          grossWt: data.grossWt,
+          netWt: data.netWt,
+          netCapacity: data.netCapacity,
+          pistonDisplacement: data.pistonDisplacement,
+          series: data.series,
+          ownerName: data.ownerName
+        });
       });
       console.log(vehicles);
       setVehicles(vehicles); 
@@ -43,14 +59,25 @@ const History = () => {
       }}
       className="bg-gray-800 p-4 rounded mb-2 w-full flex-1 justify-center items-center"
     >
-      <Text className="text-lg text-white text-center">{item.licensePlate} - {item.model}</Text>
+      <Text className="text-lg text-white text-center">{item.licensePlate} - {item.make}</Text>
       {item.id === expandedVehicle && (
         <View className="bg-gray-800 p-4 rounded mb-2 w-full flex-1 justify-center items-center">
-          <View className="flex-1 justify-center items-center">
+          <View className="flex-1 ">
             <Text className="text-white">Vehicle ID: {item.id}</Text>
+            <Text className="text-white">Owner Name: {item.ownerName}</Text>
             <Text className="text-white">License Plate: {item.licensePlate}</Text>
-            <Text className="text-white">Model: {item.model}</Text>
-            <Text className="text-white">Year: {item.year}</Text>
+            <Text className="text-white">Make: {item.make}</Text>
+            <Text className="text-white">Year Model: {item.yearModel}</Text>
+            <Text className="text-white">Color: {item.color}</Text>
+            <Text className="text-white">Body Type: {item.bodyType}</Text>
+            <Text className="text-white">Chassis Number: {item.chassisNumber}</Text>
+            <Text className="text-white">Engine Number: {item.engineNumber}</Text>
+            <Text className="text-white">Fuel: {item.fuel}</Text>
+            <Text className="text-white">Gross Weight: {item.grossWt}</Text>
+            <Text className="text-white">Net Weight: {item.netWt}</Text>
+            <Text className="text-white">Net Capacity: {item.netCapacity}</Text>
+            <Text className="text-white">Piston Displacement: {item.pistonDisplacement}</Text>
+            <Text className="text-white">Series: {item.series}</Text>
           </View>
         </View>
       )}
