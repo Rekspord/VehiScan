@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Alert, Modal } from 'react-native';
-import { vehiclesCollection, db, app } from '../../firebaseConfig';
+import { View, Text, TextInput, TouchableOpacity, Alert, Modal, CameraRoll , ToastAndroid, PermissionsAndroid } from 'react-native';
+import { vehiclesCollection, db, app, auth } from '../../firebaseConfig';
 import { collection, onSnapshot } from 'firebase/firestore';
 import { addDoc } from 'firebase/firestore';
 import QRCode from 'react-native-qrcode-svg';
@@ -74,37 +74,64 @@ const AddVehicle = () => {
     setVehicleInfo({ ...vehicleInfo, [field]: value.toUpperCase() });
   };
 
+  const getMonthFromPlateNumber = (licensePlate) => {
+    const lastNumber = parseInt(licensePlate.slice(-1));
+    const months = [
+      "October", "January", "February", "March", "April", 
+      "May", "June", "July", "August",
+      "September"
+    ];
+    // Using modulo to ensure number maps to valid month (0-11)
+    return months[lastNumber % 12];
+  };
+
   const handleSubmit = async () => {
-    // Log all values to check which might be empty
-    console.log('Vehicle Info:', vehicleInfo);
-    
-    // Check each field individually and log empty ones
-    Object.entries(vehicleInfo).forEach(([key, value]) => {
-        if (value === '') {
-            console.log('Empty field:', key);
-        }
-    });
-
     if (Object.values(vehicleInfo).some(value => value === '')) {
-      Alert.alert('Error', 'Please fill in all fields');
-      return;
+        Alert.alert('Error', 'Please fill in all fields');
+        return;
     }
-  
-    try {
-      const docRef = await addDoc(vehiclesCollection, vehicleInfo);
-      const vehicleId = docRef.id;
-      setQrCodeValue(`vehiscan://vehicle/${vehicleId}`);
-      setModalVisible(true);
-    } catch (error) {
-      Alert.alert('Error', 'There was an error submitting your vehicle information.');
-      console.error('Error adding vehicle: ', error);
-    }
-  };
 
-  const handleDownloadQrCode = () => {
-    // Implement QR code download logic here
-    console.log('QR code downloaded!');
-  };
+    const duplicateLicense = vehicles.find(
+        vehicle => vehicle.licensePlate === vehicleInfo.licensePlate
+    );
+
+    if (duplicateLicense) {
+        Alert.alert('Error', 'A vehicle with this license plate already exists');
+        return;
+    }
+
+    try {
+        const registrationMonth = getMonthFromPlateNumber(vehicleInfo.licensePlate);
+        const vehicleData = {
+            ...vehicleInfo,
+            userId: auth.currentUser.uid,
+            registrationMonth: registrationMonth,
+            createdAt: new Date().toISOString()
+        };
+        
+        const docRef = await addDoc(collection(db, 'vehicles'), vehicleData);
+        setQrCodeValue(`vehiscan://vehicle/${docRef.id}`);
+        setModalVisible(true);
+    } catch (error) {
+        Alert.alert('Error', 'There was an error submitting your vehicle information.');
+        console.error('Error adding vehicle: ', error);
+    }
+};
+    
+const hasAndroidPermission = async() => {
+    const permission=
+    PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE;
+    
+      const hasPermission = 
+    await PermissionsAndroid.check(permission);
+      if (hasPermission) {
+        return true;
+      }
+    
+      const status = await PermissionsAndroid.request(permission);
+      return status === 'granted';
+    }
+    
 
   return (
     <View className="flex-1 justify-center items-center bg-gray-600 p-4">
@@ -138,22 +165,22 @@ const AddVehicle = () => {
         />
       </View>
       <View className="flex-row w-full max-w-md mb-4">
-      <TextInput
-        className="flex-1 border border-gray-400 rounded-lg p-4 text-base bg-gray-200 text-gray-700 mr-2"
-        placeholder="Color"
-        placeholderTextColor="#A0A0A0"
-        value={vehicleInfo.color}
-        onChangeText={(value) => handleInputChange('color', value)}
-        autoCapitalize="characters"
-      />
-      <TextInput
-        className="flex-1 border border-gray-400 rounded-lg p-4 text-base bg-gray-200 text-gray-700"
-        placeholder="License Plate"
-        placeholderTextColor="#A0A0A0"
-        value={vehicleInfo.licensePlate}
-        onChangeText={(value) => handleInputChange('licensePlate', value)}
-        autoCapitalize="characters"
-      />
+        <TextInput
+          className="flex-1 border border-gray-400 rounded-lg p-4 text-base bg-gray-200 text-gray-700 mr-2"
+          placeholder="Color"
+          placeholderTextColor="#A0A0A0"
+          value={vehicleInfo.color}
+          onChangeText={(value) => handleInputChange('color', value)}
+          autoCapitalize="characters"
+        />
+        <TextInput
+          className="flex-1 border border-gray-400 rounded-lg p-4 text-base bg-gray-200 text-gray-700"
+          placeholder="License Plate"
+          placeholderTextColor="#A0A0A0"
+          value={vehicleInfo.licensePlate}
+          onChangeText={(value) => handleInputChange('licensePlate', value)}
+          autoCapitalize="characters"
+        />
       </View>
       <TextInput
         className="w-full max-w-md border border-gray-400 rounded-lg p-4 mb-4 text-base bg-gray-200 text-gray-700"
@@ -245,11 +272,10 @@ const AddVehicle = () => {
         <View className="flex-1 justify-center items-center bg-gray-600 p-4">
           <Text className="text-2xl font-bold mb-8">Generated QR Code</Text>
           <QRCode value={qrCodeValue} size={200} color="#000" backgroundColor="#fff" />
-          <TouchableOpacity
-            className="w-full max-w-md bg-gray-700 rounded-lg p-4 mb-4"
-            onPress={handleDownloadQrCode}
-          >
-            <Text className="text-center text-white font-bold">Download QR Code</Text>
+          <TouchableOpacity 
+              className="w-full max-w-md bg-gray-700 rounded-lg p-4 mb-4"
+              onPress={() => { saveQrToDisk() }}>
+            <Text className="w-full max-w-md bg-gray-700 rounded-lg p-4 mb-4">Save to Gallery</Text>
           </TouchableOpacity>
           <TouchableOpacity
             className="w-full max-w-md bg-gray-700 rounded-lg p-4 mb-4"

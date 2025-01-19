@@ -12,7 +12,6 @@ import { Link, useRouter } from 'expo-router';
 const Main = () => {
   const [hasPermission, setHasPermission] = useState(null);
   const [scanned, setScanned] = useState(false);
-  const [barcode, setBarcode] = useState('');
   const router = useRouter();
 
   useEffect(() => {
@@ -51,74 +50,6 @@ const Main = () => {
     }
   };
 
-  const validateProps = (minSize, maxSize, toleranceFactor) => {
-    if (minSize == null || maxSize == null || toleranceFactor == null) {
-      throw new Error(
-        "QRCodeScanner: minSize, maxSize, and toleranceFactor must be provided."
-      );
-    }
-    if (
-      typeof minSize !== "number" ||
-      typeof maxSize !== "number" ||
-      typeof toleranceFactor !== "number"
-    ) {
-      throw new Error(
-        "QRCodeScanner: minSize, maxSize, and toleranceFactor must be numbers."
-      );
-    }
-  };
-
-  const handleScan = (scanData) => {
-    if (!scanningInfinitely) {
-      setScanned(true);
-    }
-
-    const cameraViewSize = {
-      width: Dimensions.get("screen").width,
-      height: Dimensions.get("screen").height,
-    };
-
-    if (
-      handleBarCodeScanned(
-        scanData.type,
-        scanData.data,
-        scanData.cornerPoints,
-        cameraViewSize,
-        minSize,
-        maxSize,
-        toleranceFactor
-      )
-    ) {
-      if (onScanSuccess) {
-        onScanSuccess(scanData);
-      }
-    } else {
-      if (onScanFail) {
-        onScanFail(scanData);
-      }
-    }
-  };
-
-  const handleBarcode = async (barcode) => {
-    if (!scanned) {
-      setScanned(true); // limits scan
-      setBarcode(barcode); // stores barcode
-      checkBarcodeStatus(barcode).then((status) => {
-        if (status === 0) {
-          console.log("Barcode found");
-          setModalVisible(true);
-          setModalType("found"); // Set the modal type to "found"
-        } else if (status === 1) {
-          console.log("Barcode not found");
-          setModalVisible(true);
-          setModalType("notFound"); // Set the modal type to "notFound"
-        } else {
-          console.log("Error checking barcode.");
-        }
-      });
-    }
-  };
-
   const handleProfile = () => {
     router.push('profile');
   };
@@ -142,8 +73,8 @@ const Main = () => {
             <CameraView
               style={{ width: 400, height: 500 }}
               facing="back"
-              onBarcodeScanned={(barcode) => {
-                scanned ? undefined : processAnyQRCode(barcode.type, barcode.data);
+              onBarcodeScanned={(qrcode) => {
+                scanned ? undefined : processAnyQRCode(qrcode.type, qrcode.data);
               }}
             />
 

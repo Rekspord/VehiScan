@@ -53,7 +53,7 @@ const Menu = () => {
 
       <View className="w-full mb-4 bottom-56">
         <TouchableOpacity onPress={handleVehicle} className="bg-gray-800 p-4 rounded w-full">
-          <Text className="text-white text-center">Vehicles</Text>
+          <Text className="text-white text-center">My Vehicles</Text>
         </TouchableOpacity>
       </View>
       
